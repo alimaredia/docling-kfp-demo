@@ -89,13 +89,13 @@ def download_docling_models(
 
     output_path_p.mkdir(parents=True, exist_ok=True)
 
-    download_models(
-        output_dir=output_path_p,
-        progress=True,
-        with_layout=True,
-        with_tableformer=True,
-        with_easyocr=True,
-    )
+    #download_models(
+    #    output_dir=output_path_p,
+    #    progress=True,
+    #    with_layout=True,
+    #    with_tableformer=True,
+    #    with_easyocr=True,
+    #)
 
 
 @dsl.component(
