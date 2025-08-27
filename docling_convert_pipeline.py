@@ -36,12 +36,12 @@ def convert_pipeline(
         num_splits=num_splits,
     )
 
-    artifacts = download_docling_models()
+    #artifacts = download_docling_models()
 
     with dsl.ParallelFor(pdf_splits.output) as pdf_split:
         converter = docling_convert(
             input_path=importer.outputs["output_path"],
-            artifacts_path=artifacts.outputs["output_path"],
+            #artifacts_path=artifacts.outputs["output_path"],
             pdf_split=pdf_split,
             pdf_backend=docling_pdf_backend,
             image_export_mode=docling_image_export_mode,

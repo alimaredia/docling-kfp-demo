@@ -36,11 +36,6 @@ components:
     executorLabel: exec-docling-convert
     inputDefinitions:
       artifacts:
-        artifacts_path:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
-          description: Path to the directory containing Docling models.
         input_path:
           artifactType:
             schemaTitle: system.Artifact
@@ -93,14 +88,6 @@ components:
           artifactType:
             schemaTitle: system.Artifact
             schemaVersion: 0.0.1
-  comp-download-docling-models:
-    executorLabel: exec-download-docling-models
-    outputDefinitions:
-      artifacts:
-        output_path:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
   comp-for-loop-1:
     dag:
       tasks:
@@ -110,8 +97,6 @@ components:
             name: comp-docling-convert
           inputs:
             artifacts:
-              artifacts_path:
-                componentInputArtifact: pipelinechannel--download-docling-models-output_path
               input_path:
                 componentInputArtifact: pipelinechannel--import-pdfs-output_path
             parameters:
@@ -139,10 +124,6 @@ components:
             name: docling-convert
     inputDefinitions:
       artifacts:
-        pipelinechannel--download-docling-models-output_path:
-          artifactType:
-            schemaTitle: system.Artifact
-            schemaVersion: 0.0.1
         pipelinechannel--import-pdfs-output_path:
           artifactType:
             schemaTitle: system.Artifact
@@ -249,7 +230,7 @@ deploymentSpec:
           '
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef docling_convert(\n    input_path: dsl.Input[dsl.Artifact],\n\
-          \    artifacts_path: dsl.Input[dsl.Artifact],\n    output_path: dsl.Output[dsl.Artifact],\n\
+          \    #artifacts_path: dsl.Input[dsl.Artifact],\n    output_path: dsl.Output[dsl.Artifact],\n\
           \    pdf_split: List[str],\n    pdf_backend: str = \"dlparse_v4\",\n   \
           \ image_export_mode: str = \"embedded\",\n    table_mode: str = \"accurate\"\
           ,\n    num_threads: int = 4,\n    timeout_per_document: int = 0,\n    remote_model_enabled:\
@@ -281,7 +262,7 @@ deploymentSpec:
           \   allowed_backends = {e.value for e in PdfBackend}\n    if pdf_backend\
           \ not in allowed_backends:\n        raise ValueError(\n            f\"Invalid\
           \ pdf_backend: {pdf_backend}. Must be one of {sorted(allowed_backends)}\"\
-          \n        )\n\n    input_path_p = Path(input_path.path)\n    artifacts_path_p\
+          \n        )\n\n    input_path_p = Path(input_path.path)\n    #artifacts_path_p\
           \ = Path(artifacts_path.path)\n    output_path_p = Path(output_path.path)\n\
           \    output_path_p.mkdir(parents=True, exist_ok=True)\n\n    input_pdfs\
           \ = [input_path_p / name for name in pdf_split]\n    print(f\"docling-convert:\
@@ -295,7 +276,7 @@ deploymentSpec:
           \ to markdown.\",\n            timeout=360,\n            response_format=ResponseFormat.MARKDOWN,\n\
           \            headers={\n                \"Authorization\": f\"Bearer {remote_model_api_key}\"\
           ,\n            },\n        )\n\n    else:\n        pipeline_options = PdfPipelineOptions()\n\
-          \        pipeline_options.artifacts_path = artifacts_path_p\n        pipeline_options.do_ocr\
+          \        #pipeline_options.artifacts_path = artifacts_path_p\n        pipeline_options.do_ocr\
           \ = True\n        pipeline_options.do_table_structure = True\n        pipeline_options.table_structure_options.do_cell_matching\
           \ = True\n        pipeline_options.generate_page_images = True\n       \
           \ pipeline_options.table_structure_options.mode = TableFormerMode(table_mode)\n\
@@ -315,8 +296,8 @@ deploymentSpec:
           \            InputFormat.PDF: PdfFormatOption(\n                pipeline_options=pipeline_options,\n\
           \                backend=backend_class,\n                pipeline_cls=VlmPipeline\
           \ if remote_model_enabled else StandardPdfPipeline,\n            )\n   \
-          \     }\n    )\n\n    easyocr_path_p = artifacts_path_p / \"EasyOcr\"\n\
-          \    os.environ[\"MODULE_PATH\"] = str(easyocr_path_p)\n    os.environ[\"\
+          \     }\n    )\n\n    #easyocr_path_p = artifacts_path_p / \"EasyOcr\"\n\
+          \    #os.environ[\"MODULE_PATH\"] = str(easyocr_path_p)\n    #os.environ[\"\
           EASYOCR_MODULE_PATH\"] = str(easyocr_path_p)\n\n    results = doc_converter.convert_all(input_pdfs,\
           \ raises_on_error=True)\n\n    for result in results:\n        doc_filename\
           \ = result.input.file.stem\n\n        output_json_path = output_path_p /\
@@ -336,41 +317,6 @@ deploymentSpec:
           resourceCpuRequest: 500m
           resourceMemoryLimit: 6G
           resourceMemoryRequest: 1G
-    exec-download-docling-models:
-      container:
-        args:
-        - --executor_input
-        - '{{$}}'
-        - --function_to_execute
-        - download_docling_models
-        command:
-        - sh
-        - -c
-        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
-          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
-          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.14.2'\
-          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
-          $0\" \"$@\"\n"
-        - sh
-        - -ec
-        - 'program_path=$(mktemp -d)
-
-
-          printf "%s" "$0" > "$program_path/ephemeral_component.py"
-
-          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
-
-          '
-        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
-          \ *\n\ndef download_docling_models(\n    output_path: dsl.Output[dsl.Artifact],\n\
-          ):\n    \"\"\"\n    Download Docling models.\n\n    Args:\n        output_path:\
-          \ Path to the output directory for Docling models.\n    \"\"\"\n    from\
-          \ pathlib import Path\n    from docling.utils.model_downloader import download_models\n\
-          \n    output_path_p = Path(output_path.path)\n\n    output_path_p.mkdir(parents=True,\
-          \ exist_ok=True)\n\n    #download_models(\n    #    output_dir=output_path_p,\n\
-          \    #    progress=True,\n    #    with_layout=True,\n    #    with_tableformer=True,\n\
-          \    #    with_easyocr=True,\n    #)\n\n"
-        image: quay.io/fabianofranz/docling-ubi9:2.45.0
     exec-import-pdfs:
       container:
         args:
@@ -442,26 +388,14 @@ root:
               componentInputParameter: num_splits
         taskInfo:
           name: create-pdf-splits
-      download-docling-models:
-        cachingOptions:
-          enableCache: true
-        componentRef:
-          name: comp-download-docling-models
-        taskInfo:
-          name: download-docling-models
       for-loop-1:
         componentRef:
           name: comp-for-loop-1
         dependentTasks:
         - create-pdf-splits
-        - download-docling-models
         - import-pdfs
         inputs:
           artifacts:
-            pipelinechannel--download-docling-models-output_path:
-              taskOutputArtifact:
-                outputArtifactKey: output_path
-                producerTask: download-docling-models
             pipelinechannel--import-pdfs-output_path:
               taskOutputArtifact:
                 outputArtifactKey: output_path

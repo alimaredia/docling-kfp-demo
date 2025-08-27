@@ -103,7 +103,7 @@ def download_docling_models(
 )
 def docling_convert(
     input_path: dsl.Input[dsl.Artifact],
-    artifacts_path: dsl.Input[dsl.Artifact],
+    #artifacts_path: dsl.Input[dsl.Artifact],
     output_path: dsl.Output[dsl.Artifact],
     pdf_split: List[str],
     pdf_backend: str = "dlparse_v4",
@@ -151,7 +151,7 @@ def docling_convert(
         )
 
     input_path_p = Path(input_path.path)
-    artifacts_path_p = Path(artifacts_path.path)
+    #artifacts_path_p = Path(artifacts_path.path)
     output_path_p = Path(output_path.path)
     output_path_p.mkdir(parents=True, exist_ok=True)
 
@@ -180,7 +180,7 @@ def docling_convert(
 
     else:
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.artifacts_path = artifacts_path_p
+        #pipeline_options.artifacts_path = artifacts_path_p
         pipeline_options.do_ocr = True
         pipeline_options.do_table_structure = True
         pipeline_options.table_structure_options.do_cell_matching = True
@@ -224,9 +224,9 @@ def docling_convert(
         }
     )
 
-    easyocr_path_p = artifacts_path_p / "EasyOcr"
-    os.environ["MODULE_PATH"] = str(easyocr_path_p)
-    os.environ["EASYOCR_MODULE_PATH"] = str(easyocr_path_p)
+    #easyocr_path_p = artifacts_path_p / "EasyOcr"
+    #os.environ["MODULE_PATH"] = str(easyocr_path_p)
+    #os.environ["EASYOCR_MODULE_PATH"] = str(easyocr_path_p)
 
     results = doc_converter.convert_all(input_pdfs, raises_on_error=True)
 
