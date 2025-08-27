@@ -277,7 +277,7 @@ deploymentSpec:
           \            headers={\n                \"Authorization\": f\"Bearer {remote_model_api_key}\"\
           ,\n            },\n        )\n\n    else:\n        pipeline_options = PdfPipelineOptions()\n\
           \        #pipeline_options.artifacts_path = artifacts_path_p\n        pipeline_options.do_ocr\
-          \ = True\n        pipeline_options.do_table_structure = True\n        pipeline_options.table_structure_options.do_cell_matching\
+          \ = False\n        pipeline_options.do_table_structure = True\n        pipeline_options.table_structure_options.do_cell_matching\
           \ = True\n        pipeline_options.generate_page_images = True\n       \
           \ pipeline_options.table_structure_options.mode = TableFormerMode(table_mode)\n\
           \n    pipeline_options.document_timeout = float(timeout_per_document)\n\

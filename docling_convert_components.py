@@ -181,7 +181,7 @@ def docling_convert(
     else:
         pipeline_options = PdfPipelineOptions()
         #pipeline_options.artifacts_path = artifacts_path_p
-        pipeline_options.do_ocr = True
+        pipeline_options.do_ocr = False
         pipeline_options.do_table_structure = True
         pipeline_options.table_structure_options.do_cell_matching = True
         pipeline_options.generate_page_images = True
