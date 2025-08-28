@@ -143,6 +143,8 @@ def docling_convert(
         TableFormerMode,
         VlmPipelineOptions,
     )
+    from docling.pipeline.vlm_pipeline import VlmPipeline  # pylint: disable=import-outside-toplevel  # noqa: PLC0415, E402
+    from docling.pipeline.standard_pdf_pipeline import StandardPdfPipeline  # pylint: disable=import-outside-toplevel  # noqa: PLC0415, E402
     from docling.document_converter import DocumentConverter, PdfFormatOption  # pylint: disable=import-outside-toplevel  # noqa: PLC0415, E402
     from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions  # pylint: disable=import-outside-toplevel  # noqa: PLC0415, E402
     from docling.datamodel.pipeline_options_vlm_model import ApiVlmOptions, ResponseFormat # pylint: disable=import-outside-toplevel  # noqa: PLC0415, E402
@@ -186,7 +188,6 @@ def docling_convert(
 
     else:
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.artifacts_path = artifacts_path_p
         pipeline_options.do_ocr = True
         pipeline_options.do_table_structure = True
         pipeline_options.table_structure_options.do_cell_matching = True
@@ -194,6 +195,7 @@ def docling_convert(
         pipeline_options.table_structure_options.mode = TableFormerMode(table_mode)
         pipeline_cls = StandardPdfPipeline
 
+    pipeline_options.artifacts_path = artifacts_path_p
     pipeline_options.document_timeout = float(timeout_per_document)
     pipeline_options.accelerator_options = AcceleratorOptions(
         num_threads=num_threads, device=AcceleratorDevice.AUTO
